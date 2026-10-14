@@ -17,34 +17,33 @@ button.main{background:#ffd54a;border:0;border-radius:8px;padding:12px 20px;font
 .fab{position:fixed;bottom:12px;right:12px;display:flex;gap:8px;z-index:9}.fab button{box-shadow:0 3px 10px rgba(0,0,0,.5)}
 small,.note{opacity:.85;font-size:.82em}dt{font-weight:700;margin-top:6px}dd{margin:0 0 4px 0;opacity:.9}summary{cursor:pointer;font-weight:700}
 </style></head><body><div class="wrap">
-<h1>♠ Pokerhjelper</h1><div class="note">Texas Hold'em: bør du være med i hånden? Velg kort og situasjon.</div>
+<h1>♠ Pokerhjelper</h1><div class="note">Texas Hold'em: bør du være med i hånden? Velg kortene dine og fyll inn situasjonen.</div>
 <div class="panel"><h2>Dine kort</h2><div class="slots" id="hole"></div>
 <h2 style="margin-top:10px">Bordkort (0, 3, 4 eller 5)</h2><div class="slots" id="board"></div>
 <div class="picker" id="picker"></div><div id="live" class="note" style="margin-top:8px"></div></div>
 <div class="panel grid">
-<div><label>Antall motstandere</label><select id="opp"></select></div>
-<div><label>Motstandertype</label><select id="otype"><option value="random">Tilfeldig (alle hender)</option><option value="tight">Stram – kun gode hender</option><option value="normal" selected>Normal</option><option value="loose">Løs – spiller mye</option><option value="aggr">Aggressiv – satser mye</option></select></div>
-<div><label>Din posisjon</label><select id="pos">
-<option value="UTG">UTG – først ut</option><option value="MP">MP – midtposisjon</option><option value="CO">CO – cutoff</option>
-<option value="BTN" selected>BTN – knappen</option><option value="SB">SB – lille blind</option><option value="BB">BB – store blind</option></select><small id="posx"></small></div>
-<div><label>Potten før din tur (inkl. motstandernes innsatser)</label><input id="pot" type="number" min="0" value="30"></div>
-<div><label>Beløp for å synle (0 = du handler først)</label><input id="call" type="number" min="0" value="10"></div>
-<div><label>Din stack</label><input id="stack" type="number" min="0" value="1000"></div>
-<div><label>Store blind (valgfritt)</label><input id="bb" type="number" min="0" value="10"></div>
+<div><label>Spillere rundt bordet</label><select id="tsize"></select></div>
+<div><label>Din plass</label><select id="seat"></select><small id="posx"></small></div>
+<div><label>Hvor mange andre er fortsatt med i hånden?</label><select id="opp"></select></div>
+<div><label>Hvordan spiller de andre?</label><select id="otype"><option value="random">Vet ikke (helt tilfeldig)</option><option value="tight">Forsiktig – blir bare med på gode kort</option><option value="normal" selected>Normal</option><option value="loose">Løs – blir med på det meste</option><option value="aggr">Aggressiv – byr høyt og ofte</option></select></div>
+<div><label>Penger i potten nå (inkludert det de andre har budt)</label><input id="pot" type="number" min="0" value="30"></div>
+<div><label>Hva det koster deg å være med (0 = ingen har budt)</label><input id="call" type="number" min="0" value="10"></div>
+<div><label>Pengene (sjetongene) du har foran deg</label><input id="stack" type="number" min="0" value="1000"></div>
+<div><label>Store blind – minste innsats (valgfritt)</label><input id="bb" type="number" min="0" value="10"></div>
 </div>
 <div style="text-align:center"><button class="main" id="go">Beregn</button><div class="bar" style="margin-top:8px"><i id="prog"></i></div></div>
-<div class="panel" id="out" hidden><div class="rec" id="rec"></div><p id="why"></p><div class="stats" id="stats"></div><p id="draws" class="note"></p></div>
+<div class="panel" id="out" hidden><div class="rec" id="rec"></div><p id="why"></p><div class="stats" id="stats"></div><p id="draws" class="note"></p><details><summary>Vis detaljer</summary><div class="stats" id="adv" style="margin-top:8px"></div></details></div>
 <div class="panel"><details><summary>📖 Ordliste og hjelp</summary><dl>
-<dt>Egenkapital (equity)</dt><dd>Hvor stor andel av potten du i snitt vinner hvis hånden spilles helt ut. Beregnes her ved å simulere 20 000 tilfeldige utfall.</dd>
-<dt>Pottodds</dt><dd>Forholdet mellom potten og det det koster å synle. Potten før din tur (inkludert motstanderens innsats) er 30, og det koster 10 å synle. Du risikerer 10 for å vinne 30, altså pottodds 3:1, og trenger minst 10 ÷ (30 + 10) = 25 % vinnersjanse. Formel: synl ÷ (pott + synl). Fyll derfor inn potten <i>inkludert</i> innsatsen du må svare på.</dd>
-<dt>Outs og 2-og-4-regelen</dt><dd>Outs er kort som forbedrer hånden din til to par eller bedre; hvert kort telles bare én gang selv om det gir både flush og straight. Overkort er «svake outs» (gir bare ett par) og teller halvt i prosenten. Etter floppen: outs × 4 ≈ % sjanse til river (over 8 outs trekkes (outs − 8) fra, ellers blir tallet for høyt). Etter turn: outs × 2 ≈ % sjanse på river.</dd>
-<dt>Implisitte odds</dt><dd>Penger du kan vinne <i>senere</i> hvis du treffer. Med store stacker kan et dro være verdt å synle selv om pottoddsen alene ikke holder.</dd>
-<dt>Posisjon</dt><dd>Hvor du sitter i forhold til knappen. Sene posisjoner (CO, BTN) ser hva andre gjør først og kan spille flere hender. Tidlige (UTG, MP) må være strengere.</dd>
-<dt>SPR (stack-til-pott)</dt><dd>Det du har igjen bak etter et eventuelt synl, delt på potten etter synlet: (stack − synl) ÷ (pott + synl). Eksempel: stack 1000, pott 100, synl 50 → 950 ÷ 150 ≈ 6,3. Lav SPR (under ~3): en god hånd kan gå all-in. Høy SPR (over ~10): vær forsiktig med middels hender, dro får bedre verdi.</dd>
-<dt>Kast / Synl / Sjekk / Sats / Høyn</dt><dd>Fold / call / check / bet / raise.</dd></dl></details></div>
+<dt>Vinnersjanse</dt><dd>Hvor ofte du vinner hvis alle blir med til siste kort. Siden regner ut dette ved å spille hånden 20 000 ganger på liksom.</dd>
+<dt>Er det verdt å betale?</dt><dd>Se på hva du må betale og hva du kan vinne. Ligger det 30 i potten og det koster deg 10, betaler du 10 for å vinne 30. Da må du vinne minst 10 av 40 ganger = 25 % for at det skal lønne seg. Regnestykket: det du betaler ÷ (potten + det du betaler).</dd>
+<dt>Kort som hjelper deg</dt><dd>Kortene som er igjen i bunken og som gjør hånden din mye bedre (f.eks. gir deg flush eller straight). Tommelfingerregel: etter de tre første bordkortene, gang antallet med 4 for å få omtrent hvor mange prosent sjanse du har til å treffe før siste kort. Med ett kort igjen, gang med 2. Kort som bare gir et høyt par teller halvt.</dd>
+<dt>Penger du kan vinne senere</dt><dd>Hvis du venter på et kort og treffer, kan du ofte vinne mer i de neste rundene. Har alle mye penger igjen, kan det derfor være greit å betale litt for å se neste kort.</dd>
+<dt>Plassen din</dt><dd>Giveren (D) handler sist etter de første bordkortene og ser hva alle andre gjør – det er beste plass. De som sitter rett etter de to blindene må bestemme seg først, og bør bare spille gode kort.</dd>
+<dt>Stack i forhold til potten</dt><dd>Hvor mye du har igjen etter å ha betalt, delt på potten: (dine penger − det du betaler) ÷ (potten + det du betaler). Eksempel: 1000 i penger, 100 i potten, koster 50 → 950 ÷ 150 ≈ 6,3. Lavt tall (under 3): med god hånd kan du like gjerne gå all-in. Høyt tall (over 10): vær forsiktig med bare ett par.</dd>
+<dt>Ordene</dt><dd><b>Kast</b> = gi opp hånden. <b>Synl</b> = betal det samme som de andre for å være med. <b>Sjekk</b> = stå over uten å betale (bare når ingen har budt). <b>Sats</b> = by først. <b>Høyn</b> = by mer enn de andre. <b>All-in</b> = sett inn alt du har.</dd></dl></details></div>
 <p class="note">⚠️ Dette er et læringsverktøy, ingen garanti. Motstanderprofilene er grove forenklinger av ekte spillere. Spill om penger innebærer risiko – spill ansvarlig.</p>
 </div>
-<div class="fab"><button class="sec" id="next">▶ Neste gate</button><button class="sec" id="clr">↺ Ny hånd</button></div>
+<div class="fab"><button class="sec" id="next">▶ Neste bordkort</button><button class="sec" id="clr">↺ Ny hånd</button></div>
 <script id="engine">
 // ===== Motor (testes også i node) =====
 const RANKS="23456789TJQKA",SUITS="shdc",SYM={s:"♠",h:"♥",d:"♦",c:"♣"};
@@ -90,13 +89,14 @@ function analyze(hole,board){if(board.length<3)return null;const all=hole.concat
  for(let c=0;c<52;c++){if(used.has(c))continue;const nc=cat(evalHand(all.concat([c])));
   if(nc>cc&&nc>=2&&cat(evalHand(board.concat([c])))<nc){strong.add(c);if(nc===5||nc===8)fl.add(c);else if(nc===4)st.add(c)}}
  if(cc===0)hole.forEach(hc=>{if((hc>>2)>bmax)for(let c=0;c<52;c++)if(!used.has(c)&&(c>>2)===(hc>>2)&&!strong.has(c))weak.add(c)});
- const draws=[];if(left){if(cc<5&&fl.size)draws.push(`flushdro (${fl.size} outs)`);
+ const draws=[];if(left){if(cc<5&&fl.size)draws.push(`nesten flush (${fl.size} kort hjelper)`);
   if(cc<4&&st.size){let comp=0;for(let r=0;r<13;r++)if(!(mask&(1<<r))&&straightHi(mask|(1<<r)))comp++;const stOnly=[...st].filter(c=>!fl.has(c)).length;
-   draws.push(`${comp>=2?"åpen straightdro":"gutshot straightdro"} (${stOnly} outs${fl.size?" utenom flushkortene":""})`)}
-  const other=strong.size-fl.size-[...st].filter(c=>!fl.has(c)).length;if(other>0)draws.push(`andre forbedringer (${other} outs)`);
-  if(weak.size)draws.push(`overkort (${weak.size} svake outs – gir bare ett par)`)}
+   draws.push(`${comp>=2?"nesten straight, åpen i begge ender":"nesten straight, mangler ett kort i midten"} (${stOnly}${fl.size?" andre":""} kort hjelper)`)}
+  const other=strong.size-fl.size-[...st].filter(c=>!fl.has(c)).length;if(other>0)draws.push(`andre forbedringer (${other} kort hjelper)`);
+  if(weak.size)draws.push(`høye kort (${weak.size} kort gir et høyt par – litt hjelp)`)}
  const outs=left?strong.size:0,w=left?weak.size:0,eff=outs+w/2,pct=left===2?Math.min(Math.round(eff*4-Math.max(0,eff-8)),100):left===1?Math.round(eff*2):0;
  return{name:CATS[cc],cat:cc,outs,weak:w,pct,draws}}
+function seatToPos(k,n){if(n<=2)return k===0?"BTN":"BB";if(k===0)return"BTN";if(k===1)return"SB";if(k===2)return"BB";if(n>=5&&k===n-1)return"CO";return k<=3+Math.floor((n-5)/2)?"UTG":"MP"}
 function reqEquity(pot,call){return call>0?call/(pot+call):0}
 function potOdds(pot,call){return call>0?pot/call:0}
 function decide(o){// o:{eq,pot,call,stack,bb,pos,preflop,hole,opp,otype,info}
@@ -106,47 +106,53 @@ function decide(o){// o:{eq,pot,call,stack,bb,pos,preflop,hole,opp,otype,info}
  if(o.preflop){const lab=chartLabel(o.hole,o.pos);edge+={sterk:.06,spillbar:.02,marginal:-.02,svak:-.06}[lab];o.chart=lab}
  const strong=edge>.7||edge>Math.max(req+.15,fair*1.6);
  if(call===0){
-  if(strong||edge>fair*1.3&&edge>.5){act="Sats";const p=edge>.75?75:60;raise=Math.round(o.pot*p/100)||Math.round((o.bb||10)*2.5);why=`Du er favoritt (${pc(eq)}). Sats ca. ${p} % av potten for verdi.`}
-  else if(info&&info.draws.length&&info.outs>=8&&o.pos!=="UTG"){act="Sats";raise=Math.round(o.pot*.5);why=`Halvbløff: du har ${info.draws.join(", ")}. En sats på ca. 50 % av potten kan vinne potten nå eller treffe senere.`}
-  else{act="Sjekk";why="Hånden er ikke sterk nok til å satse – sjekk og se neste kort gratis."}}
+  if(strong||edge>fair*1.3&&edge>.5){act="Sats";const p=edge>.75?75:60;raise=Math.round(o.pot*p/100)||Math.round((o.bb||10)*2.5);why=`Du har gode kort og vinner ca. ${pc(eq)} av gangene. By ca. ${p} % av potten så de andre må betale for å være med.`}
+  else if(info&&info.draws.length&&info.outs>=8&&o.pos!=="UTG"){act="Sats";raise=Math.round(o.pot*.5);why=`Du har ikke noe ennå, men du venter på et godt kort (${info.draws.join(", ")}). Et bud på ca. halve potten kan få de andre til å gi opp – og treffer du, vinner du uansett.`}
+  else{act="Sjekk";why="Kortene er ikke gode nok til å by på. Stå over – da får du se neste kort gratis."}}
  else{const need=req+aggr;
   if(edge<need){const implied=info&&info.outs>=8&&info.draws.length&&o.stack-call>=call*10&&spr>3;
-   if(implied){act="Synl";why=`Pottoddsen alene krever ${pc(req)} og du har ${pc(eq)}, men med ${info.draws.join(", ")} og dype stacker (SPR ${spr.toFixed(1)}) gir implisitte odds et lønnsomt synl.`}
-   else{act="Kast";why=`Du trenger minst ${pc(need)} vinnersjanse for å synle lønnsomt, men har ca. ${pc(eq)}.`+(aggr?" Aggressive motstandere satser ofte, så regn med mer press senere.":"")}}
+   if(implied){act="Synl";why=`Akkurat nå er det litt dyrt (du burde vinne ${pc(req)}, du vinner ca. ${pc(eq)}). Men du venter på et godt kort (${info.draws.join(", ")}), og alle har mye penger igjen – treffer du, kan du vinne mye mer senere. Derfor er det greit å betale.`}
+   else{act="Kast";why=`Det koster for mye i forhold til hvor ofte du vinner. Du trenger minst ${pc(need)} for at det skal lønne seg, men vinner bare ca. ${pc(eq)}.`+(aggr?" De andre byr høyt, så det blir sannsynligvis dyrere senere.":"")}}
   else if(strong){act="Høyn"}
-  else{act="Synl";why=`Vinnersjansen (${pc(eq)}) er høyere enn prisen krever (${pc(req)}), men ikke sterk nok til å høyne.`}}
+  else{act="Synl";why=`Det lønner seg å være med: du vinner ca. ${pc(eq)}, og trenger bare ${pc(req)}. Men kortene er ikke gode nok til å by mer.`}}
  if(act==="Høyn"){raise=o.preflop?Math.round(call*3+o.pot*.5):Math.round((o.pot+call)*(eq>.75?.75:.6)+call);
-  why=`Hånden din er klart over snittet (${pc(eq)} mot ${o.opp} motstander${o.opp>1?"e":""}, «rettferdig» andel ${pc(fair)}). Høyn for å bygge potten.`}
- if((act==="Høyn"||act==="Sats")&&(raise>=o.stack*.5||spr<3&&edge>.6)){raise=o.stack;why+=` Lav SPR (${isFinite(spr)?spr.toFixed(1):"–"}): du er i praksis bundet til potten – gå all-in.`}
- else if(act==="Synl"&&spr>10&&info&&info.cat<=1&&!info.draws.length)why+=" Obs: høy SPR og bare ett par – vær forsiktig hvis det kommer store satsinger senere.";
- if(o.preflop&&o.chart)why+=` Startkort-tabellen sier «${o.chart}» fra ${o.pos}.`;
+  why=`Du har veldig gode kort: du vinner ca. ${pc(eq)} mot ${o.opp} spiller${o.opp>1?"e":""} (vanlig andel er ${pc(fair)}). By mer så potten blir større.`}
+ if((act==="Høyn"||act==="Sats")&&(raise>=o.stack*.5||spr<3&&edge>.6)){raise=o.stack;why+=" Du har lite penger igjen i forhold til potten, så sett inn alt (all-in)."}
+ else if(act==="Synl"&&spr>10&&info&&info.cat<=1&&!info.draws.length)why+=" Obs: du har bare ett par og det kan bli mye penger senere – vær forsiktig hvis noen byr høyt.";
+ if(o.preflop&&o.chart)why+=` Starthånden din er «${o.chart}» fra plassen du sitter på.`;
  return{act,why,raise,req,spr}}
-if(typeof module!=="undefined")module.exports={reqEquity,potOdds,evalHand,parseCard,equity,decide,chartScore,chartLabel,analyze,cat,CATS};
+if(typeof module!=="undefined")module.exports={seatToPos,reqEquity,potOdds,evalHand,parseCard,equity,decide,chartScore,chartLabel,analyze,cat,CATS};
 </script>
 <script>
 const $=id=>document.getElementById(id);let hole=[null,null],board=[null,null,null,null,null],active={a:hole,i:0};
-const POSX={UTG:"Under the gun: første til å handle preflop. Spill bare sterke hender.",MP:"Midtposisjon: litt flere hender enn UTG.",CO:"Cutoff: til høyre for knappen, kan spille ganske løst.",BTN:"Knappen: handler sist etter floppen – beste posisjon, spill flest hender.",SB:"Lille blind: har betalt halv blind, men handler først etter floppen.",BB:"Store blind: har allerede betalt, kan forsvare med mange hender."};
-for(let i=1;i<=9;i++)$("opp").innerHTML+=`<option ${i===2?"selected":""}>${i}</option>`;
+const POSX={UTG:"Tidlig plass – du må bestemme deg før de fleste. Spill bare sterke kort.",MP:"Midt ved bordet – spill litt flere kort enn de tidlige plassene.",CO:"Sen plass – du kan spille flere kort.",BTN:"Beste plass – du handler sist og ser hva alle andre gjør. Du kan spille flest kort.",SB:"Du har betalt halv minsteinnsats, men må handle tidlig senere i hånden. Vær litt forsiktig.",BB:"Du har allerede betalt minsteinnsatsen, så det er billig å være med."};
+const pos=()=>seatToPos(+$("seat").value,+$("tsize").value);
+function fillSeats(){const n=+$("tsize").value,old=+$("seat").value||0;let h="";for(let k=0;k<n;k++){const nm=k===0?"Giver (D)":n===2?"Nr. 1 etter giver (store blind)":k===1?"Nr. 1 etter giver (lille blind)":k===2?"Nr. 2 etter giver (store blind)":`Nr. ${k} etter giver`+(k===n-1?" (rett før giver)":"");h+=`<option value="${k}">${nm}</option>`}$("seat").innerHTML=h;$("seat").value=Math.min(old,n-1);
+ let o="";for(let i=1;i<n;i++)o+=`<option ${i===n-1?"selected":""}>${i}</option>`;$("opp").innerHTML=o}
+for(let i=2;i<=10;i++)$("tsize").innerHTML+=`<option ${i===6?"selected":""}>${i}</option>`;fillSeats();$("tsize").onchange=()=>{fillSeats();render()};
+
 function cardHTML(c){const s=SUITS[c&3];return `<span class="${s==="h"||s==="d"?"red":"blk"}">${RANKS[c>>2].replace("T","10")}${SYM[s]}</span>`}
 function boardCards(){return board.filter(c=>c!==null)}
 function render(){for(const [id,arr] of [["hole",hole],["board",board]]){$(id).innerHTML="";arr.forEach((c,i)=>{const d=document.createElement("div");d.className="slot"+(c!==null?" f":"")+(active.a===arr&&active.i===i?" act":"");d.innerHTML=c!==null?cardHTML(c):"+";d.onclick=()=>{if(c!==null)arr[i]=null;active={a:arr,i};render()};$(id).appendChild(d)})}
  const used=new Set([...hole,...board].filter(c=>c!==null));$("picker").innerHTML="";for(let s=0;s<4;s++)for(let r=12;r>=0;r--){const c=r*4+s,b=document.createElement("button");b.className="pc";b.innerHTML=cardHTML(c);b.disabled=used.has(c);b.onclick=()=>pick(c);$("picker").appendChild(b)}
- $("posx").textContent=POSX[$("pos").value];
- const b=boardCards();let t="";if(!hole.includes(null)){if(b.length>=3){const a=analyze(hole,b);t=`<b>Du har: ${a.name}</b>`+(a.draws.length?` · Dro: ${a.draws.join(", ")}`:"")+(a.outs||a.weak?` · ${a.outs} outs${a.weak?` + ${a.weak} svake`:""} ≈ ${a.pct} % å treffe (2-og-4-regelen, grovt anslag – trykk Beregn for simulert vinnersjanse)`:"")}else t=`<b>Startkort:</b> ${chartLabel(hole,$("pos").value)} fra ${$("pos").value} (skår ${chartScore(hole)})`}$("live").innerHTML=t}
+ $("posx").textContent=POSX[pos()];
+ const b=boardCards();let t="";if(!hole.includes(null)){if(b.length>=3){const a=analyze(hole,b);t=`<b>Du har: ${a.name}</b>`+(a.draws.length?` · Venter på: ${a.draws.join(", ")}`:"")+(a.outs||a.weak?` · ${a.outs} kort hjelper${a.weak?` (+ ${a.weak} litt)`:""} ≈ ${a.pct} % å treffe (grovt anslag – trykk Beregn for nøyaktig vinnersjanse)`:"")}else t=`<b>Starthånd:</b> ${chartLabel(hole,pos())} fra plassen din`}$("live").innerHTML=t}
 function pick(c){active.a[active.i]=c;const order=[...hole.map((x,i)=>[hole,i]),...board.map((x,i)=>[board,i])];const nx=order.find(([a,i])=>a[i]===null);if(nx)active={a:nx[0],i:nx[1]};render()}
 $("clr").onclick=()=>{hole.fill(null);board.fill(null);active={a:hole,i:0};$("out").hidden=true;$("prog").style.width=0;render();scrollTo(0,0)};
 $("next").onclick=()=>{const n=boardCards().length;const tgt=n<3?3:Math.min(n+1,5);for(let i=0;i<5;i++)if(board[i]===null&&i<tgt){active={a:board,i};break}$("call").value=0;$("out").hidden=true;render();$("board").scrollIntoView({behavior:"smooth"})};
-$("pos").onchange=render;
+$("seat").onchange=render;
 $("go").onclick=()=>{if(hole.includes(null))return alert("Velg begge dine kort først.");const b=boardCards();if(b.length===1||b.length===2)return alert("Bordet må ha 0, 3, 4 eller 5 kort.");
  const opp=+$("opp").value,ot=$("otype").value,total=20000,chunk=1000;let done=0,acc=0;$("go").disabled=true;
  (function step(){acc+=equity(hole,b,opp,chunk,ot)*chunk;done+=chunk;$("prog").style.width=(done/total*100)+"%";if(done<total)return setTimeout(step,0);$("go").disabled=false;show(acc/total,b,opp,ot)})()};
 function show(eq,b,opp,ot){const n=k=>Math.max(0,+$(k).value||0);const pot=n("pot"),call=n("call"),stack=n("stack"),bb=n("bb");const info=analyze(hole,b);
- const d=decide({eq,pot,call,stack,bb,pos:$("pos").value,preflop:b.length===0,hole,opp,otype:ot,info});$("out").hidden=false;
+ const d=decide({eq,pot,call,stack,bb,pos:pos(),preflop:b.length===0,hole,opp,otype:ot,info});$("out").hidden=false;
  const ai=d.raise>=stack?" (all-in)":"";$("rec").className="rec "+d.act;
- $("rec").textContent="Anbefalt: "+{Synl:"Synl (call)",Kast:"Kast (fold)",Sjekk:"Sjekk (check)",Høyn:`Høyn (raise) til ${d.raise}${ai}`,Sats:`Sats (bet) ${d.raise}${ai}`+(pot&&!ai?` (${Math.round(d.raise/pot*100)} % av potten)`:"")}[d.act];$("why").textContent=d.why;
- const st=[["Vinnersjanse",(eq*100).toFixed(1)+" %"],["Kreves (pottodds)",call?(d.req*100).toFixed(1)+" %":"–"],["Pottodds",call?potOdds(pot,call).toFixed(1)+" : 1":"–"],["SPR",isFinite(d.spr)?d.spr.toFixed(1):"–"],["Effektiv stack",bb?(stack/bb).toFixed(0)+" BB":stack]];
- if(info){st.unshift(["Du har",info.name]);if(info.outs||info.weak)st.push(["Outs",`${info.outs}${info.weak?` + ${info.weak} svake`:""} (≈${info.pct} % å treffe; simulert vinnersjanse ${(eq*100).toFixed(0)} %)`])}else st.push(["Startkort",chartLabel(hole,$("pos").value)]);
+ $("rec").textContent="Anbefalt: "+{Synl:"Synl (betal for å være med)",Kast:"Kast (gi opp hånden)",Sjekk:"Sjekk (stå over uten å betale)",Høyn:`Høyn til ${d.raise}${ai}`,Sats:`Sats ${d.raise}${ai}`+(pot&&!ai?` (${Math.round(d.raise/pot*100)} % av potten)`:"")}[d.act];$("why").textContent=d.why;
+ const st=[["Vinnersjanse",(eq*100).toFixed(0)+" %"],["Du trenger minst",call?(d.req*100).toFixed(0)+" % for å synle":"– (gratis)"]];
+ const adv=[["Vinnersjanse (nøyaktig)",(eq*100).toFixed(1)+" %"],["Hvor mye du må betale i forhold til potten",call?`${call} for å vinne ${pot} (${potOdds(pot,call).toFixed(1)} : 1)`:"–"],["Stack i forhold til potten",isFinite(d.spr)?d.spr.toFixed(1):"–"],["Pengene dine",bb?(stack/bb).toFixed(0)+" ganger store blind":stack],["Intern plass-kode",pos()]];
+ if(info){st.unshift(["Du har",info.name]);if(info.outs||info.weak)st.push(["Kort som hjelper deg",`${info.outs}${info.weak?` (+ ${info.weak} litt)`:""} – ca. ${info.pct} % å treffe`])}else st.push(["Starthånden din",chartLabel(hole,pos())]);
+ $("adv").innerHTML=adv.map(([a,v])=>`<div class="stat"><small>${a}</small><b>${v}</b></div>`).join("");
  $("stats").innerHTML=st.map(([a,v])=>`<div class="stat"><small>${a}</small><b>${v}</b></div>`).join("");
- $("draws").textContent=info&&info.draws.length?"Dro: "+info.draws.join(", ")+".":"";$("out").scrollIntoView({behavior:"smooth"})}
+ $("draws").textContent=info&&info.draws.length?"Du venter på: "+info.draws.join(", ")+".":"";$("out").scrollIntoView({behavior:"smooth"})}
 render();
 </script></body></html>
