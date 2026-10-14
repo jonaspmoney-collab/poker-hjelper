@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%99%A0%3C/text%3E%3C/svg%3E"><title>Pokerhjelper – Texas Hold'em</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:radial-gradient(ellipse at center,#1f6b3a 0%,#0d3b1e 70%,#072212 100%);background-attachment:fixed;color:#eef;min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:14px 14px 80px}h1{margin:.2em 0;font-size:1.6em}h2{font-size:1.05em;margin:.3em 0}
+.panel{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin:10px 0}
+.slots{display:flex;gap:6px;flex-wrap:wrap}.slot{width:48px;height:66px;border-radius:7px;border:2px dashed #9c9;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.05)}
+.slot.f{background:#fff;border:2px solid #fff}.slot.act{outline:3px solid #ffd54a}.red{color:#c62828}.blk{color:#111}
+.picker{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin-top:8px}.pc{background:#fff;border:0;border-radius:4px;padding:6px 0;font-weight:700;font-size:13px;cursor:pointer}
+.pc:disabled{opacity:.2;cursor:default}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:.85em;opacity:.9}input,select{width:100%;padding:8px;border-radius:6px;border:0;font-size:1em;margin-top:3px}
+button.main{background:#ffd54a;border:0;border-radius:8px;padding:12px 20px;font-size:1.1em;font-weight:700;cursor:pointer}button.sec{background:#e0e0e0;border:0;border-radius:20px;padding:9px 14px;cursor:pointer;font-weight:600}
+.rec{font-size:1.9em;font-weight:800;text-align:center;padding:10px;border-radius:10px}.Kast{background:#8b1a1a}.Synl{background:#1a4f8b}.Høyn{background:#a36b00}.Sjekk{background:#2e6b2e}.Sats{background:#a36b00}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.stat{background:rgba(0,0,0,.25);border-radius:8px;padding:8px;text-align:center}.stat b{display:block;font-size:1.2em}
+.bar{height:8px;background:#333;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:#ffd54a;width:0}
+.fab{position:fixed;bottom:12px;right:12px;display:flex;gap:8px;z-index:9}.fab button{box-shadow:0 3px 10px rgba(0,0,0,.5)}
+small,.note{opacity:.85;font-size:.82em}dt{font-weight:700;margin-top:6px}dd{margin:0 0 4px 0;opacity:.9}summary{cursor:pointer;font-weight:700}
+</style></head><body><div class="wrap">
+<h1>♠ Pokerhjelper</h1><div class="note">Texas Hold'em: bør du være med i hånden? Velg kort og situasjon.</div>
+<div class="panel"><h2>Dine kort</h2><div class="slots" id="hole"></div>
+<h2 style="margin-top:10px">Bordkort (0, 3, 4 eller 5)</h2><div class="slots" id="board"></div>
+<div class="picker" id="picker"></div><div id="live" class="note" style="margin-top:8px"></div></div>
+<div class="panel grid">
+<div><label>Antall motstandere</label><select id="opp"></select></div>
+<div><label>Motstandertype</label><select id="otype"><option value="random">Tilfeldig (alle hender)</option><option value="tight">Stram – kun gode hender</option><option value="normal" selected>Normal</option><option value="loose">Løs – spiller mye</option><option value="aggr">Aggressiv – satser mye</option></select></div>
+<div><label>Din posisjon</label><select id="pos">
+<option value="UTG">UTG – først ut</option><option value="MP">MP – midtposisjon</option><option value="CO">CO – cutoff</option>
+<option value="BTN" selected>BTN – knappen</option><option value="SB">SB – lille blind</option><option value="BB">BB – store blind</option></select><small id="posx"></small></div>
+<div><label>Potten før din tur (inkl. motstandernes innsatser)</label><input id="pot" type="number" min="0" value="30"></div>
+<div><label>Beløp for å synle (0 = du handler først)</label><input id="call" type="number" min="0" value="10"></div>
+<div><label>Din stack</label><input id="stack" type="number" min="0" value="1000"></div>
+<div><label>Store blind (valgfritt)</label><input id="bb" type="number" min="0" value="10"></div>
+</div>
+<div style="text-align:center"><button class="main" id="go">Beregn</button><div class="bar" style="margin-top:8px"><i id="prog"></i></div></div>
+<div class="panel" id="out" hidden><div class="rec" id="rec"></div><p id="why"></p><div class="stats" id="stats"></div><p id="draws" class="note"></p></div>
+<div class="panel"><details><summary>📖 Ordliste og hjelp</summary><dl>
+<dt>Egenkapital (equity)</dt><dd>Hvor stor andel av potten du i snitt vinner hvis hånden spilles helt ut. Beregnes her ved å simulere 20 000 tilfeldige utfall.</dd>
+<dt>Pottodds</dt><dd>Forholdet mellom potten og det det koster å synle. Potten før din tur (inkludert motstanderens innsats) er 30, og det koster 10 å synle. Du risikerer 10 for å vinne 30, altså pottodds 3:1, og trenger minst 10 ÷ (30 + 10) = 25 % vinnersjanse. Formel: synl ÷ (pott + synl). Fyll derfor inn potten <i>inkludert</i> innsatsen du må svare på.</dd>
+<dt>Outs og 2-og-4-regelen</dt><dd>Outs er kort som forbedrer hånden din til to par eller bedre; hvert kort telles bare én gang selv om det gir både flush og straight. Overkort er «svake outs» (gir bare ett par) og teller halvt i prosenten. Etter floppen: outs × 4 ≈ % sjanse til river (over 8 outs trekkes (outs − 8) fra, ellers blir tallet for høyt). Etter turn: outs × 2 ≈ % sjanse på river.</dd>
+<dt>Implisitte odds</dt><dd>Penger du kan vinne <i>senere</i> hvis du treffer. Med store stacker kan et dro være verdt å synle selv om pottoddsen alene ikke holder.</dd>
+<dt>Posisjon</dt><dd>Hvor du sitter i forhold til knappen. Sene posisjoner (CO, BTN) ser hva andre gjør først og kan spille flere hender. Tidlige (UTG, MP) må være strengere.</dd>
+<dt>SPR (stack-til-pott)</dt><dd>Det du har igjen bak etter et eventuelt synl, delt på potten etter synlet: (stack − synl) ÷ (pott + synl). Eksempel: stack 1000, pott 100, synl 50 → 950 ÷ 150 ≈ 6,3. Lav SPR (under ~3): en god hånd kan gå all-in. Høy SPR (over ~10): vær forsiktig med middels hender, dro får bedre verdi.</dd>
+<dt>Kast / Synl / Sjekk / Sats / Høyn</dt><dd>Fold / call / check / bet / raise.</dd></dl></details></div>
+<p class="note">⚠️ Dette er et læringsverktøy, ingen garanti. Motstanderprofilene er grove forenklinger av ekte spillere. Spill om penger innebærer risiko – spill ansvarlig.</p>
+</div>
+<div class="fab"><button class="sec" id="next">▶ Neste gate</button><button class="sec" id="clr">↺ Ny hånd</button></div>
+<script id="engine">
+// ===== Motor (testes også i node) =====
+const RANKS="23456789TJQKA",SUITS="shdc",SYM={s:"♠",h:"♥",d:"♦",c:"♣"};
+const CATS=["høyt kort","ett par","to par","tre like","straight","flush","fullt hus","fire like","straight flush"];
+function straightHi(mask){const m=(mask<<1)|((mask>>12)&1);for(let h=13;h>=4;h--)if(((m>>(h-4))&31)===31)return h;return 0}
+function topBits(mask,n){const r=[];for(let i=12;i>=0&&r.length<n;i--)if(mask&(1<<i))r.push(i);return r}
+function pack(cat,ks){let s=cat;for(let i=0;i<5;i++)s=s*16+(ks[i]||0);return s}
+const cat=v=>Math.floor(v/1048576);
+// kort: 0..51, rang=c>>2 (0=2..12=A), farge=c&3
+function evalHand(cards){const cnt=new Array(13).fill(0),sm=[0,0,0,0],sc=[0,0,0,0];let mask=0;
+ for(const c of cards){const r=c>>2,s=c&3;cnt[r]++;sm[s]|=1<<r;sc[s]++;mask|=1<<r}
+ const q=[],t=[],p=[],o=[];for(let r=12;r>=0;r--){const n=cnt[r];if(n===4)q.push(r);else if(n===3)t.push(r);else if(n===2)p.push(r);else if(n===1)o.push(r)}
+ for(let s=0;s<4;s++)if(sc[s]>=5){const h=straightHi(sm[s]);if(h)return pack(8,[h]);if(!q.length&&!(t.length&&(t.length>1||p.length)))return pack(5,topBits(sm[s],5))}
+ if(q.length){const k=topBits(mask&~(1<<q[0]),1);return pack(7,[q[0],k[0]])}
+ if(t.length&&(t.length>1||p.length)){const pr=Math.max(t[1]??-1,p[0]??-1);return pack(6,[t[0],pr])}
+ const st=straightHi(mask);if(st)return pack(4,[st]);
+ if(t.length)return pack(3,[t[0],...o.slice(0,2)]);
+ if(p.length>=2){const k=[...p.slice(2),...o].sort((a,b)=>b-a);return pack(2,[p[0],p[1],k[0]])}
+ if(p.length)return pack(1,[p[0],...o.slice(0,3)]);return pack(0,o.slice(0,5))}
+function parseCard(s){return RANKS.indexOf(s[0].toUpperCase())*4+SUITS.indexOf(s[1].toLowerCase())}
+// Startkort-skår (Chen-lignende)
+function chartScore(h){let a=h[0]>>2,b=h[1]>>2;if(a<b)[a,b]=[b,a];const suited=(h[0]&3)===(h[1]&3),pair=a===b;
+ const base=[1,1.5,2,2.5,3,3.5,4,4.5,5,6,7,8,10][a];let s=pair?Math.max(5,base*2):base;if(suited)s+=2;
+ const gap=a-b-1;if(!pair){s-=gap<=0?0:gap===1?1:gap===2?2:gap===3?4:5;if(gap<=1&&a<10)s+=1}return Math.ceil(s)}
+const CHART_MIN={UTG:9,MP:8,CO:7,BTN:6,SB:7,BB:5};
+function chartLabel(h,pos){const s=chartScore(h),m=CHART_MIN[pos];return s>=m+3?"sterk":s>=m?"spillbar":s>=m-1?"marginal":"svak"}
+// Motstanderprofil: minste startkort-skår de spiller (preflop-range)
+const OTYPE={random:{min:-99,aggr:0},tight:{min:9,aggr:0},normal:{min:6,aggr:0},loose:{min:3,aggr:0},aggr:{min:5,aggr:.04}};
+function equity(hole,board,opp,iters,type,rng){rng=rng||Math.random;const minS=(OTYPE[type]||OTYPE.random).min;
+ const base=[];const used0=new Set([...hole,...board]);for(let c=0;c<52;c++)if(!used0.has(c))base.push(c);
+ let win=0;const need=5-board.length;
+ for(let it=0;it<iters;it++){const deck=base.slice();let n=deck.length;const draw=()=>{const j=Math.floor(rng()*n);const x=deck[j];deck[j]=deck[--n];return x};
+  const hands=[];for(let o=0;o<opp;o++){let h;for(let tr=0;tr<40;tr++){const j1=Math.floor(rng()*n);let j2=Math.floor(rng()*(n-1));if(j2>=j1)j2++;h=[deck[j1],deck[j2]];if(minS<-50||chartScore(h)>=minS||tr===39){const hi=Math.max(j1,j2),lo=Math.min(j1,j2);deck[hi]=deck[--n];deck[lo]=deck[--n];break}}hands.push(h)}
+  const b=board.slice();for(let i=0;i<need;i++)b.push(draw());
+  const me=evalHand(hole.concat(b));let ties=0,lose=false;
+  for(const h of hands){const v=evalHand(h.concat(b));if(v>me){lose=true;break}if(v===me)ties++}
+  if(!lose)win+=1/(ties+1)}return win/iters}
+// Outs og dro
+function analyze(hole,board){if(board.length<3)return null;const all=hole.concat(board),cur=evalHand(all),cc=cat(cur);
+ const used=new Set(all),left=5-board.length;const sc=[0,0,0,0];all.forEach(c=>sc[c&3]++);
+ let mask=0;all.forEach(c=>mask|=1<<(c>>2));const bmax=Math.max(...board.map(c=>c>>2));
+ const strong=new Set(),fl=new Set(),st=new Set(),weak=new Set();
+ for(let c=0;c<52;c++){if(used.has(c))continue;const nc=cat(evalHand(all.concat([c])));
+  if(nc>cc&&nc>=2&&cat(evalHand(board.concat([c])))<nc){strong.add(c);if(nc===5||nc===8)fl.add(c);else if(nc===4)st.add(c)}}
+ if(cc===0)hole.forEach(hc=>{if((hc>>2)>bmax)for(let c=0;c<52;c++)if(!used.has(c)&&(c>>2)===(hc>>2)&&!strong.has(c))weak.add(c)});
+ const draws=[];if(left){if(cc<5&&fl.size)draws.push(`flushdro (${fl.size} outs)`);
+  if(cc<4&&st.size){let comp=0;for(let r=0;r<13;r++)if(!(mask&(1<<r))&&straightHi(mask|(1<<r)))comp++;const stOnly=[...st].filter(c=>!fl.has(c)).length;
+   draws.push(`${comp>=2?"åpen straightdro":"gutshot straightdro"} (${stOnly} outs${fl.size?" utenom flushkortene":""})`)}
+  const other=strong.size-fl.size-[...st].filter(c=>!fl.has(c)).length;if(other>0)draws.push(`andre forbedringer (${other} outs)`);
+  if(weak.size)draws.push(`overkort (${weak.size} svake outs – gir bare ett par)`)}
+ const outs=left?strong.size:0,w=left?weak.size:0,eff=outs+w/2,pct=left===2?Math.min(Math.round(eff*4-Math.max(0,eff-8)),100):left===1?Math.round(eff*2):0;
+ return{name:CATS[cc],cat:cc,outs,weak:w,pct,draws}}
+function reqEquity(pot,call){return call>0?call/(pot+call):0}
+function potOdds(pot,call){return call>0?pot/call:0}
+function decide(o){// o:{eq,pot,call,stack,bb,pos,preflop,hole,opp,otype,info}
+ const call=Math.min(o.call,o.stack),req=reqEquity(o.pot,call);const aggr=(OTYPE[o.otype]||{}).aggr||0;
+ const spr=o.pot>0?(o.stack-call)/(o.pot+call):Infinity;let act,why="",raise=0;
+ const fair=1/(o.opp+1),eq=o.eq;let edge=eq;const info=o.info,pc=v=>(v*100).toFixed(0)+" %";
+ if(o.preflop){const lab=chartLabel(o.hole,o.pos);edge+={sterk:.06,spillbar:.02,marginal:-.02,svak:-.06}[lab];o.chart=lab}
+ const strong=edge>.7||edge>Math.max(req+.15,fair*1.6);
+ if(call===0){
+  if(strong||edge>fair*1.3&&edge>.5){act="Sats";const p=edge>.75?75:60;raise=Math.round(o.pot*p/100)||Math.round((o.bb||10)*2.5);why=`Du er favoritt (${pc(eq)}). Sats ca. ${p} % av potten for verdi.`}
+  else if(info&&info.draws.length&&info.outs>=8&&o.pos!=="UTG"){act="Sats";raise=Math.round(o.pot*.5);why=`Halvbløff: du har ${info.draws.join(", ")}. En sats på ca. 50 % av potten kan vinne potten nå eller treffe senere.`}
+  else{act="Sjekk";why="Hånden er ikke sterk nok til å satse – sjekk og se neste kort gratis."}}
+ else{const need=req+aggr;
+  if(edge<need){const implied=info&&info.outs>=8&&info.draws.length&&o.stack-call>=call*10&&spr>3;
+   if(implied){act="Synl";why=`Pottoddsen alene krever ${pc(req)} og du har ${pc(eq)}, men med ${info.draws.join(", ")} og dype stacker (SPR ${spr.toFixed(1)}) gir implisitte odds et lønnsomt synl.`}
+   else{act="Kast";why=`Du trenger minst ${pc(need)} vinnersjanse for å synle lønnsomt, men har ca. ${pc(eq)}.`+(aggr?" Aggressive motstandere satser ofte, så regn med mer press senere.":"")}}
+  else if(strong){act="Høyn"}
+  else{act="Synl";why=`Vinnersjansen (${pc(eq)}) er høyere enn prisen krever (${pc(req)}), men ikke sterk nok til å høyne.`}}
+ if(act==="Høyn"){raise=o.preflop?Math.round(call*3+o.pot*.5):Math.round((o.pot+call)*(eq>.75?.75:.6)+call);
+  why=`Hånden din er klart over snittet (${pc(eq)} mot ${o.opp} motstander${o.opp>1?"e":""}, «rettferdig» andel ${pc(fair)}). Høyn for å bygge potten.`}
+ if((act==="Høyn"||act==="Sats")&&(raise>=o.stack*.5||spr<3&&edge>.6)){raise=o.stack;why+=` Lav SPR (${isFinite(spr)?spr.toFixed(1):"–"}): du er i praksis bundet til potten – gå all-in.`}
+ else if(act==="Synl"&&spr>10&&info&&info.cat<=1&&!info.draws.length)why+=" Obs: høy SPR og bare ett par – vær forsiktig hvis det kommer store satsinger senere.";
+ if(o.preflop&&o.chart)why+=` Startkort-tabellen sier «${o.chart}» fra ${o.pos}.`;
+ return{act,why,raise,req,spr}}
+if(typeof module!=="undefined")module.exports={reqEquity,potOdds,evalHand,parseCard,equity,decide,chartScore,chartLabel,analyze,cat,CATS};
+</script>
+<script>
+const $=id=>document.getElementById(id);let hole=[null,null],board=[null,null,null,null,null],active={a:hole,i:0};
+const POSX={UTG:"Under the gun: første til å handle preflop. Spill bare sterke hender.",MP:"Midtposisjon: litt flere hender enn UTG.",CO:"Cutoff: til høyre for knappen, kan spille ganske løst.",BTN:"Knappen: handler sist etter floppen – beste posisjon, spill flest hender.",SB:"Lille blind: har betalt halv blind, men handler først etter floppen.",BB:"Store blind: har allerede betalt, kan forsvare med mange hender."};
+for(let i=1;i<=9;i++)$("opp").innerHTML+=`<option ${i===2?"selected":""}>${i}</option>`;
+function cardHTML(c){const s=SUITS[c&3];return `<span class="${s==="h"||s==="d"?"red":"blk"}">${RANKS[c>>2].replace("T","10")}${SYM[s]}</span>`}
+function boardCards(){return board.filter(c=>c!==null)}
+function render(){for(const [id,arr] of [["hole",hole],["board",board]]){$(id).innerHTML="";arr.forEach((c,i)=>{const d=document.createElement("div");d.className="slot"+(c!==null?" f":"")+(active.a===arr&&active.i===i?" act":"");d.innerHTML=c!==null?cardHTML(c):"+";d.onclick=()=>{if(c!==null)arr[i]=null;active={a:arr,i};render()};$(id).appendChild(d)})}
+ const used=new Set([...hole,...board].filter(c=>c!==null));$("picker").innerHTML="";for(let s=0;s<4;s++)for(let r=12;r>=0;r--){const c=r*4+s,b=document.createElement("button");b.className="pc";b.innerHTML=cardHTML(c);b.disabled=used.has(c);b.onclick=()=>pick(c);$("picker").appendChild(b)}
+ $("posx").textContent=POSX[$("pos").value];
+ const b=boardCards();let t="";if(!hole.includes(null)){if(b.length>=3){const a=analyze(hole,b);t=`<b>Du har: ${a.name}</b>`+(a.draws.length?` · Dro: ${a.draws.join(", ")}`:"")+(a.outs||a.weak?` · ${a.outs} outs${a.weak?` + ${a.weak} svake`:""} ≈ ${a.pct} % å treffe (2-og-4-regelen, grovt anslag – trykk Beregn for simulert vinnersjanse)`:"")}else t=`<b>Startkort:</b> ${chartLabel(hole,$("pos").value)} fra ${$("pos").value} (skår ${chartScore(hole)})`}$("live").innerHTML=t}
+function pick(c){active.a[active.i]=c;const order=[...hole.map((x,i)=>[hole,i]),...board.map((x,i)=>[board,i])];const nx=order.find(([a,i])=>a[i]===null);if(nx)active={a:nx[0],i:nx[1]};render()}
+$("clr").onclick=()=>{hole.fill(null);board.fill(null);active={a:hole,i:0};$("out").hidden=true;$("prog").style.width=0;render();scrollTo(0,0)};
+$("next").onclick=()=>{const n=boardCards().length;const tgt=n<3?3:Math.min(n+1,5);for(let i=0;i<5;i++)if(board[i]===null&&i<tgt){active={a:board,i};break}$("call").value=0;$("out").hidden=true;render();$("board").scrollIntoView({behavior:"smooth"})};
+$("pos").onchange=render;
+$("go").onclick=()=>{if(hole.includes(null))return alert("Velg begge dine kort først.");const b=boardCards();if(b.length===1||b.length===2)return alert("Bordet må ha 0, 3, 4 eller 5 kort.");
+ const opp=+$("opp").value,ot=$("otype").value,total=20000,chunk=1000;let done=0,acc=0;$("go").disabled=true;
+ (function step(){acc+=equity(hole,b,opp,chunk,ot)*chunk;done+=chunk;$("prog").style.width=(done/total*100)+"%";if(done<total)return setTimeout(step,0);$("go").disabled=false;show(acc/total,b,opp,ot)})()};
+function show(eq,b,opp,ot){const n=k=>Math.max(0,+$(k).value||0);const pot=n("pot"),call=n("call"),stack=n("stack"),bb=n("bb");const info=analyze(hole,b);
+ const d=decide({eq,pot,call,stack,bb,pos:$("pos").value,preflop:b.length===0,hole,opp,otype:ot,info});$("out").hidden=false;
+ const ai=d.raise>=stack?" (all-in)":"";$("rec").className="rec "+d.act;
+ $("rec").textContent={Synl:"Synl (call)",Kast:"Kast (fold)",Sjekk:"Sjekk",Høyn:`Høyn til ${d.raise}${ai}`,Sats:`Sats ${d.raise}${ai}`+(pot&&!ai?` (${Math.round(d.raise/pot*100)} % av potten)`:"")}[d.act];$("why").textContent=d.why;
+ const st=[["Vinnersjanse",(eq*100).toFixed(1)+" %"],["Kreves (pottodds)",call?(d.req*100).toFixed(1)+" %":"–"],["Pottodds",call?potOdds(pot,call).toFixed(1)+" : 1":"–"],["SPR",isFinite(d.spr)?d.spr.toFixed(1):"–"],["Effektiv stack",bb?(stack/bb).toFixed(0)+" BB":stack]];
+ if(info){st.unshift(["Du har",info.name]);if(info.outs||info.weak)st.push(["Outs",`${info.outs}${info.weak?` + ${info.weak} svake`:""} (≈${info.pct} % å treffe; simulert vinnersjanse ${(eq*100).toFixed(0)} %)`])}else st.push(["Startkort",chartLabel(hole,$("pos").value)]);
+ $("stats").innerHTML=st.map(([a,v])=>`<div class="stat"><small>${a}</small><b>${v}</b></div>`).join("");
+ $("draws").textContent=info&&info.draws.length?"Dro: "+info.draws.join(", ")+".":"";$("out").scrollIntoView({behavior:"smooth"})}
+render();
+</script></body></html>
