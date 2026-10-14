@@ -143,7 +143,7 @@ $("go").onclick=()=>{if(hole.includes(null))return alert("Velg begge dine kort f
 function show(eq,b,opp,ot){const n=k=>Math.max(0,+$(k).value||0);const pot=n("pot"),call=n("call"),stack=n("stack"),bb=n("bb");const info=analyze(hole,b);
  const d=decide({eq,pot,call,stack,bb,pos:$("pos").value,preflop:b.length===0,hole,opp,otype:ot,info});$("out").hidden=false;
  const ai=d.raise>=stack?" (all-in)":"";$("rec").className="rec "+d.act;
- $("rec").textContent={Synl:"Synl (call)",Kast:"Kast (fold)",Sjekk:"Sjekk",Høyn:`Høyn til ${d.raise}${ai}`,Sats:`Sats ${d.raise}${ai}`+(pot&&!ai?` (${Math.round(d.raise/pot*100)} % av potten)`:"")}[d.act];$("why").textContent=d.why;
+ $("rec").textContent="Anbefalt: "+{Synl:"Synl (call)",Kast:"Kast (fold)",Sjekk:"Sjekk (check)",Høyn:`Høyn (raise) til ${d.raise}${ai}`,Sats:`Sats (bet) ${d.raise}${ai}`+(pot&&!ai?` (${Math.round(d.raise/pot*100)} % av potten)`:"")}[d.act];$("why").textContent=d.why;
  const st=[["Vinnersjanse",(eq*100).toFixed(1)+" %"],["Kreves (pottodds)",call?(d.req*100).toFixed(1)+" %":"–"],["Pottodds",call?potOdds(pot,call).toFixed(1)+" : 1":"–"],["SPR",isFinite(d.spr)?d.spr.toFixed(1):"–"],["Effektiv stack",bb?(stack/bb).toFixed(0)+" BB":stack]];
  if(info){st.unshift(["Du har",info.name]);if(info.outs||info.weak)st.push(["Outs",`${info.outs}${info.weak?` + ${info.weak} svake`:""} (≈${info.pct} % å treffe; simulert vinnersjanse ${(eq*100).toFixed(0)} %)`])}else st.push(["Startkort",chartLabel(hole,$("pos").value)]);
  $("stats").innerHTML=st.map(([a,v])=>`<div class="stat"><small>${a}</small><b>${v}</b></div>`).join("");
