@@ -3,7 +3,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%E2%99%A0%3C/text%3E%3C/svg%3E"><title>Pokerhjelper – Texas Hold'em</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:radial-gradient(ellipse at center,#1f6b3a 0%,#0d3b1e 70%,#072212 100%);background-attachment:fixed;color:#eef;min-height:100vh}
-.wrap{max-width:900px;margin:auto;padding:14px 14px 130px}h1{margin:.2em 0;font-size:1.6em}h2{font-size:1.05em;margin:.3em 0}
+.wrap{max-width:900px;margin:auto;padding:14px 14px 60px}h1{margin:.2em 0;font-size:1.6em}h2{font-size:1.05em;margin:.3em 0}
 .panel{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin:10px 0}
 .slots{display:flex;gap:6px;flex-wrap:wrap}.slot{width:48px;height:66px;border-radius:7px;border:2px dashed #9c9;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.05)}
 .slot.f{background:#fff;border:2px solid #fff}.slot.act{outline:3px solid #ffd54a}.red{color:#c62828}.blk{color:#111}
@@ -23,36 +23,41 @@ small,.note{opacity:.85;font-size:.82em}dt{font-weight:700;margin-top:6px}dd{mar
 details.setup>summary{font-size:1.05em;padding:4px 0}
 .seg{display:flex;border:2px solid #ffd54a;border-radius:24px;overflow:hidden;margin-bottom:10px}.seg button{flex:1;min-height:46px;border:0;background:transparent;color:#eef;font-weight:700;font-size:15px;cursor:pointer}.seg button.on{background:#ffd54a;color:#111}
 .fld{border:2px solid transparent;border-radius:10px;padding:6px}.fld.on{border-color:#ffd54a;background:rgba(255,213,74,.12)}.fld.on label{color:#ffd54a;font-weight:700}
-</style></head><body><div class="wrap">
-<h1>♠ Pokerhjelper</h1><div class="note">Texas Hold'em: bør du være med i hånden? Velg kortene dine og fyll inn situasjonen.</div>
+.topbar{position:sticky;top:0;z-index:10;background:#0b2e17;border-bottom:2px solid #ffd54a;padding:8px 12px}.tb{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;font-size:15px;max-width:900px;margin:auto}.tb b{color:#ffd54a}
+.tiny{border:0;border-radius:12px;padding:4px 10px;background:#ddd;font-weight:700;cursor:pointer}.log{max-height:170px;overflow-y:auto;background:rgba(0,0,0,.3);border-radius:8px;padding:6px 8px;font-size:.85em;line-height:1.5}
+</style></head><body><div id="err" hidden style="position:fixed;bottom:0;left:0;right:0;background:#b71c1c;color:#fff;padding:8px 12px;font-size:13px;z-index:50" onclick="this.hidden=true"></div>
+<div class="topbar"><div class="tb"><span>Du har <b id="tstack"></b> <button class="tiny" id="editbtn">Rett</button></span><span>Potten <b id="tpot"></b></span><span>Å betale <b id="tcall"></b></span></div>
+<div id="editrow" hidden class="tb" style="margin-top:6px"><label style="flex:1">Du har<input id="estack" inputmode="decimal"></label><label style="flex:1">Potten<input id="epot" inputmode="decimal"></label><button class="tiny" id="esave">Lagre</button><button class="tiny" id="ecancel">Avbryt</button></div></div>
+<div class="wrap">
+<h1>♠ Pokerhjelper</h1><div class="note">Texas Hold'em: bør du være med i hånden? Velg kortene dine, registrer hva som skjer, og trykk Beregn.</div>
 <details class="panel setup" id="setup"><summary>⚙️ Faste innstillinger <small id="setupsum"></small></summary><div class="grid" style="margin-top:8px">
 <div><label>Spillere rundt bordet</label><select id="tsize"></select></div>
-<div><label>Store blind (minste innsats)</label><input id="bb" inputmode="decimal" value="0.20"></div>
-<div><label>Pengene du har foran deg</label><input id="stack" inputmode="decimal" value="10"><div class="kr" id="stackkr"></div></div>
-<div><label>Hvor mange kroner er 1 sjetong verdt?</label><input id="krv" inputmode="decimal" value="100"></div>
-<div><label>Hvordan spiller de andre?</label><select id="otype"><option value="random">Vet ikke</option><option value="tight">Forsiktige</option><option value="normal" selected>Normale</option><option value="loose">Løse</option><option value="aggr">Aggressive</option></select><small id="otx"></small></div>
-</div></details>
+<div><label>Store blind (minste innsats)</label><input id="bb" inputmode="decimal"></div>
+<div><label>Hvor mange kroner er 1 sjetong verdt?</label><input id="krv" inputmode="decimal"></div>
+<div><label>Hvordan spiller de andre?</label><select id="otype"><option value="random">Vet ikke</option><option value="tight">Forsiktige</option><option value="normal">Normale</option><option value="loose">Løse</option><option value="aggr">Aggressive</option></select><small id="otx"></small></div>
+</div><p class="note">Pengene dine endrer du med «Rett» øverst.</p><button class="sec" id="resetapp" style="background:#c62828;color:#fff">Tilbakestill appen</button></details>
 <div class="panel"><div class="grid"><div><label>Din plass denne hånden</label><select id="seat"></select><small id="posx"></small></div>
 <div><label>Hvor mange andre er fortsatt med?</label><select id="opp"></select></div></div></div>
 <div class="panel"><h2>Dine kort</h2><div class="slots" id="hole"></div>
 <h2 style="margin-top:10px">Bordkort (0, 3, 4 eller 5)</h2><div class="slots" id="board"></div>
 <div class="note" style="margin-top:6px">Trykk verdi, så farge. Trykk på et kort for å fjerne det.</div>
 <div class="ranks" id="ranks"></div><div class="suits" id="suits"></div><div id="live" class="note" style="margin-top:8px"></div></div>
-<div class="panel">
-<div class="seg" id="seg"><button data-f="pot" class="on">Potten</button><button data-f="call">Hva koster det meg</button></div>
-<div class="grid">
-<div class="fld on" data-f="pot"><label>Penger i potten nå (inkl. det de andre har budt)</label><input class="money" id="pot" inputmode="decimal" value="0"><div class="kr" id="potkr"></div></div>
-<div class="fld" data-f="call"><label>Hva det koster deg å være med (0 = ingen har budt)</label><input class="money" id="call" inputmode="decimal" value="0"><div class="kr" id="callkr"></div></div>
-</div>
-<div class="chips" id="chips"><button class="chip" data-a="bb1">+1 BB</button><button class="chip" data-a="bb5">+5 BB</button><button class="chip" data-a="half">+½ pott</button><button class="chip" data-a="pot">+pott</button><button class="chip z" data-a="zero">Nullstill</button></div>
-<div class="note" id="chipnote" style="margin-top:4px"></div>
-</div>
 <div style="text-align:center"><button class="main" id="go" style="width:100%;min-height:52px">Beregn</button><div class="bar" style="margin-top:8px"><i id="prog"></i></div></div>
 <div class="panel" id="out" hidden><div class="rec" id="rec"></div><p id="why"></p><div class="stats" id="stats"></div><p id="draws" class="note"></p>
-<div id="didbox"><div class="note">Hva gjorde du? (oppdaterer pengene dine og potten)</div><div class="acts"><button class="sec" id="didcall">Jeg synlet / sjekket</button><button class="sec" id="didraise">Jeg høynet / satset</button><button class="sec" id="didfold">Jeg kastet</button></div><div id="raisebox" hidden style="margin-top:8px"><label>Hvor mye satte du inn totalt nå?</label><input class="money" id="raisev" inputmode="decimal"><div class="kr" id="raisekr"></div>
-<div class="chips"><button class="chip" data-r="bb1">+1 BB</button><button class="chip" data-r="half">+½ pott</button><button class="chip" data-r="pot">+pott</button><button class="chip" data-r="rec">Anbefalt</button><button class="chip z" data-r="zero">Nullstill</button></div>
-<div class="acts"><button class="main" id="raiseok">Registrer</button><button class="sec" id="raisecancel">Avbryt</button></div></div></div><div id="didmsg" class="note" style="margin-top:8px"></div>
 <details><summary>Vis detaljer</summary><div class="stats" id="adv" style="margin-top:8px"></div></details></div>
+<div class="panel" id="events"><h2>Hva skjer? (oppdaterer pengene med en gang)</h2>
+<div id="starthint" class="note"></div><button class="main" id="starthand" style="width:100%;margin:6px 0" hidden>Start hånd (legg inn blinds)</button>
+<div class="seg" id="seg"><button data-f="opp" class="on">Motstander byr</button><button data-f="me">Jeg høyner</button></div>
+<label id="amtlbl">Motstander satset/høynet til (totalt denne runden)</label><input class="money" id="amt" inputmode="decimal" value=""><div class="kr" id="amtkr"></div>
+<div class="chips" id="chips"><button class="chip" data-a="bb1">+1 BB</button><button class="chip" data-a="bb5">+5 BB</button><button class="chip" data-a="half">+½ pott</button><button class="chip" data-a="pot">+pott</button><button class="chip z" data-a="zero">Nullstill</button></div>
+<button class="main" id="reg" style="width:100%;margin-top:8px">Registrer</button>
+<div class="acts"><button class="sec" id="ecall">Jeg synlet</button><button class="sec" id="echeck">Jeg sjekket</button><button class="sec" id="efold">Jeg kastet</button></div>
+<div class="acts"><button class="sec" id="next">▶ Neste bordkort</button></div>
+<div class="acts"><button class="sec" id="ewin" style="background:#9be29b">Jeg vant potten</button><button class="sec" id="esplit">Delt pott</button><button class="sec" id="elose" style="background:#f2a7a7">Jeg tapte</button></div>
+<div class="acts"><button class="sec" id="undo">↶ Angre</button></div>
+<h2 style="margin-top:10px">Logg</h2><div id="log" class="log"></div></div>
+<div class="panel"><h2>Økten</h2><div id="sess"></div><button class="sec" id="sessreset" style="margin-top:8px">Nullstill økt</button></div>
+<div id="toast" hidden style="position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#ffd54a;color:#111;padding:10px 16px;border-radius:20px;font-weight:700;z-index:20;box-shadow:0 3px 10px rgba(0,0,0,.5)"></div>
 <div class="panel"><details><summary>📖 Ordliste og hjelp</summary><dl>
 <dt>Vinnersjanse</dt><dd>Hvor ofte du vinner hvis alle blir med til siste kort. Siden regner ut dette ved å spille hånden 20 000 ganger på liksom.</dd>
 <dt>Er det verdt å betale?</dt><dd>Se på hva du må betale og hva du kan vinne. Ligger det 30 i potten og det koster deg 10, betaler du 10 for å vinne 30. Da må du vinne minst 10 av 40 ganger = 25 % for at det skal lønne seg. Regnestykket: det du betaler ÷ (potten + det du betaler).</dd>
@@ -60,11 +65,9 @@ details.setup>summary{font-size:1.05em;padding:4px 0}
 <dt>Penger du kan vinne senere</dt><dd>Hvis du venter på et kort og treffer, kan du ofte vinne mer i de neste rundene. Har alle mye penger igjen, kan det derfor være greit å betale litt for å se neste kort.</dd>
 <dt>Plassen din</dt><dd>Giveren (D) handler sist etter de første bordkortene og ser hva alle andre gjør – det er beste plass. De som sitter rett etter de to blindene må bestemme seg først, og bør bare spille gode kort.</dd>
 <dt>Stack i forhold til potten</dt><dd>Hvor mye du har igjen etter å ha betalt, delt på potten: (dine penger − det du betaler) ÷ (potten + det du betaler). Eksempel: 1000 i penger, 100 i potten, koster 50 → 950 ÷ 150 ≈ 6,3. Lavt tall (under 3): med god hånd kan du like gjerne gå all-in. Høyt tall (over 10): vær forsiktig med bare ett par.</dd>
-<dt>Ordene</dt><dd><b>Kast</b> = gi opp hånden. <b>Synl</b> = betal det samme som de andre for å være med. <b>Sjekk</b> = stå over uten å betale (bare når ingen har budt). <b>Sats</b> = by først. <b>Høyn</b> = by mer enn de andre. <b>All-in</b> = sett inn alt du har.</dd></dl></details></div>
+<dt>Pengene</dt><dd>Trykk «Start hånd»/«Ny hånd» så legges blindene i potten. Registrer hva motstanderen byr og hva du gjør – «Du har» og «Potten» øverst oppdateres med en gang. «Angre» tar bort siste handling, «Rett» lar deg skrive inn riktig beløp.</dd><dt>Ordene</dt><dd><b>Kast</b> = gi opp hånden. <b>Synl</b> = betal det samme som de andre for å være med. <b>Sjekk</b> = stå over uten å betale (bare når ingen har budt). <b>Sats</b> = by først. <b>Høyn</b> = by mer enn de andre. <b>All-in</b> = sett inn alt du har.</dd></dl></details></div>
 <p class="note">⚠️ Dette er et læringsverktøy, ingen garanti. Motstanderprofilene er grove forenklinger av ekte spillere. Spill om penger innebærer risiko – spill ansvarlig.</p>
 </div>
-<div id="toast" hidden style="position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#ffd54a;color:#111;padding:10px 16px;border-radius:20px;font-weight:700;z-index:20;box-shadow:0 3px 10px rgba(0,0,0,.5)"></div>
-<div class="fab"><button class="sec" id="next">▶ Neste bordkort</button><button class="sec" id="clr">↺ Ny hånd (giver flytter)</button></div>
 <script id="engine">
 // ===== Motor (testes også i node) =====
 const RANKS="23456789TJQKA",SUITS="shdc",SYM={s:"♠",h:"♥",d:"♦",c:"♣"};
@@ -147,73 +150,107 @@ function decide(o){// o:{eq,pot,call,stack,bb,pos,preflop,hole,opp,otype,info}
 if(typeof module!=="undefined")module.exports={seatToPos,reqEquity,potOdds,evalHand,parseCard,equity,decide,chartScore,chartLabel,analyze,cat,CATS};
 </script>
 <script>
-const $=id=>document.getElementById(id);let hole=[null,null],board=[null,null,null,null,null],active={a:hole,i:0},selRank=null,last=null;
+const $=id=>document.getElementById(id);
+function showErr(m){const e=$("err");if(!e)return;e.textContent="⚠️ Noe gikk galt: "+m+" (trykk for å skjule). Prøv «Tilbakestill appen» i innstillingene hvis det fortsetter.";e.hidden=false}
+window.onerror=(m,u,l)=>{showErr(m+" (linje "+l+")")};window.addEventListener("unhandledrejection",e=>showErr(String(e.reason)));
 const POSX={UTG:"Tidlig plass – du må bestemme deg før de fleste. Spill bare sterke kort.",MP:"Midt ved bordet – spill litt flere kort enn de tidlige plassene.",CO:"Sen plass – du kan spille flere kort.",BTN:"Beste plass – du handler sist og ser hva alle andre gjør. Du kan spille flest kort.",SB:"Du har betalt halv minsteinnsats, men må handle tidlig senere i hånden. Vær litt forsiktig.",BB:"Du har allerede betalt minsteinnsatsen, så det er billig å være med."};
-const num=id=>{const v=parseFloat(String($(id).value).replace(",","."));return isFinite(v)&&v>0?v:0};
-const r2=v=>Math.round(v*100)/100,f2=v=>{const x=(Math.round(v*100)/100).toFixed(2);return (num("bb")||0.2)<1?x:x.replace(/\.00$/,"")};
-const kr=v=>{const k=v*(num("krv")||100);return `${Math.round(k).toLocaleString("nb-NO")} kr`},money=v=>`${f2(v)} (${kr(v)})`;
-const setV=(id,v)=>{$(id).value=f2(Math.max(0,v));updKr()};
+const KEY="pokerhjelper.v2",OLD="pokerhjelper";
+const numOk=(v,d)=>{const x=parseFloat(String(v??"").replace(",","."));return isFinite(x)&&x>=0?x:d};
+const r2=v=>Math.round(v*100)/100;
+const freshHand=()=>({hole:[null,null],board:[null,null,null,null,null],pot:0,myIn:0,oppIn:0,curBet:0,inv:0,started:false,fresh:false});
+function validHand(h){try{if(!h||typeof h!=="object")return null;const okc=c=>c===null||(Number.isInteger(c)&&c>=0&&c<52);
+ if(!Array.isArray(h.hole)||h.hole.length!==2||!h.hole.every(okc)||!Array.isArray(h.board)||h.board.length!==5||!h.board.every(okc))return null;
+ const all=[...h.hole,...h.board].filter(c=>c!==null);if(new Set(all).size!==all.length)return null;
+ return{hole:h.hole.slice(),board:h.board.slice(),pot:numOk(h.pot,0),myIn:numOk(h.myIn,0),oppIn:numOk(h.oppIn,0),curBet:numOk(h.curBet,0),inv:numOk(h.inv,0),started:!!h.started,fresh:!!h.fresh}}catch(e){return null}}
+function load(){const S={tsize:6,seat:0,bb:0.2,krv:100,otype:"normal",stack:10,sessionStart:10,opp:5,log:[],hand:freshHand()};let raw=null;
+ try{raw=JSON.parse(localStorage.getItem(KEY))}catch(e){raw=null}
+ if(!raw||typeof raw!=="object"){raw=null;try{const o=JSON.parse(localStorage.getItem(OLD));if(o&&typeof o==="object")raw=o}catch(e){}}
+ if(raw){S.tsize=Math.min(10,Math.max(2,Math.round(numOk(raw.tsize,6))));S.seat=Math.min(S.tsize-1,Math.round(numOk(raw.seat,0)));
+  S.bb=numOk(raw.bb,0)||0.2;S.krv=numOk(raw.krv,0)||100;S.otype=OTYPE[raw.otype]?raw.otype:"normal";S.stack=numOk(raw.stack,10);S.sessionStart=numOk(raw.sessionStart,S.stack);
+  S.opp=Math.min(S.tsize-1,Math.max(1,Math.round(numOk(raw.opp,S.tsize-1))));S.log=Array.isArray(raw.log)?raw.log.filter(x=>typeof x==="string").slice(-60):[];S.hand=validHand(raw.hand)||freshHand()}
+ try{localStorage.removeItem(OLD)}catch(e){}return S}
+let S=load(),hist=[],active={a:"hole",i:0},selRank=null,last=null,mode="opp";
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const H=()=>S.hand,toCall=()=>r2(Math.min(Math.max(0,H().curBet-H().myIn),S.stack));
+const f2=v=>{const x=(Math.round(v*100)/100).toFixed(2);return S.bb<1?x:x.replace(/\.00$/,"")};
+const kr=v=>`${Math.round(v*S.krv).toLocaleString("nb-NO")} kr`,money=v=>`${f2(v)} (${kr(v)})`;
+const pos=()=>seatToPos(S.seat,S.tsize);
 function seatName(k,n,short){if(k===0)return"Giver (D)";const x=n===2?" (store blind)":k===1?" (lille blind)":k===2?" (store blind)":k===n-1?" (rett før giver)":"";return short?`Nr. ${k}`+x.replace("rett før giver","før giver"):`Nr. ${k} etter giver${x}`}
-function updOt(){$("otx").textContent={random:"Vet ikke – regner med helt tilfeldige kort.",tight:"Blir bare med på gode kort.",normal:"Vanlige spillere.",loose:"Blir med på det meste.",aggr:"Byr høyt og ofte."}[$("otype").value]}
-const pos=()=>seatToPos(+$("seat").value,+$("tsize").value);
-const KEYS=["tsize","seat","bb","stack","krv","otype"];
-function save(){const o={};KEYS.forEach(k=>o[k]=$(k).value);localStorage.setItem("pokerhjelper",JSON.stringify(o));updSum()}
-function updSum(){$("setupsum").textContent=`– ${$("tsize").value} spillere, blinds ${f2(num("bb")/2)}/${f2(num("bb"))}, du har ${money(num("stack"))}, 1 sjetong = ${num("krv")||100} kr, motstandere: ${$("otype").selectedOptions[0].text.toLowerCase()}`}
-function updKr(){$("potkr").textContent=kr(num("pot"));$("callkr").textContent=kr(num("call"));$("stackkr").textContent=kr(num("stack"))}
-function fillSeats(){const n=+$("tsize").value,old=+$("seat").value||0;let h="";for(let k=0;k<n;k++){const nm=seatName(k,n,true);h+=`<option value="${k}">${nm}</option>`}$("seat").innerHTML=h;$("seat").value=Math.min(old,n-1);
- let o="";for(let i=1;i<n;i++)o+=`<option ${i===n-1?"selected":""}>${i}</option>`;$("opp").innerHTML=o}
-for(let i=2;i<=10;i++)$("tsize").innerHTML+=`<option ${i===6?"selected":""}>${i}</option>`;
-let saved=null;try{saved=JSON.parse(localStorage.getItem("pokerhjelper"))}catch(e){}
-if(saved){["tsize","bb","stack","krv","otype"].forEach(k=>{if(saved[k]!=null)$(k).value=saved[k]})}fillSeats();if(saved&&saved.seat!=null)$("seat").value=Math.min(+saved.seat,+$("tsize").value-1);
-$("setup").open=!saved;
-$("tsize").onchange=()=>{fillSeats();save();render()};["bb","stack","krv","otype"].forEach(k=>$(k).addEventListener("change",()=>{save();updKr();updOt()}));
-$("seat").onchange=()=>{save();render()};["pot","call","stack","krv"].forEach(k=>$(k).addEventListener("input",updKr));
-let field="pot";
-function selField(f){field=f;document.querySelectorAll("#seg button,.fld").forEach(e=>e.classList.toggle("on",e.dataset.f===f));$("chipnote").textContent="Knappene endrer: "+(f==="pot"?"potten":"hva det koster deg")}
-document.querySelectorAll("#seg button").forEach(b=>b.addEventListener("click",()=>selField(b.dataset.f)));
-["pot","call"].forEach(id=>["focus","click"].forEach(ev=>$(id).addEventListener(ev,()=>selField(id))));
-function chip(a){if((a==="half"||a==="pot")&&!num("pot"))toast("Potten er 0");const cur=num(field),bb=num("bb")||0.2,pot=num("pot");setV(field,a==="zero"?0:cur+(a==="bb1"?bb:a==="bb5"?5*bb:a==="half"?pot/2:pot))}
-document.querySelectorAll("#chips .chip").forEach(b=>b.addEventListener("click",()=>chip(b.dataset.a)));selField("pot");
+function myBlind(){const n=S.tsize,k=S.seat;if(n===2)return k===0?"SB":"BB";return k===1?"SB":k===2?"BB":null}
+function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2500)}
+function logp(m){S.log.push(m);if(S.log.length>60)S.log.shift()}
+function act(fn){hist.push(JSON.stringify(S));if(hist.length>40)hist.shift();fn();if(!S.hand._js)S.hand.fresh=false;delete S.hand._js;save();renderAll()}
+function startHand(){const h=H(),bb=S.bb,sb=r2(bb/2);h.pot=r2(sb+bb);h.curBet=bb;h.oppIn=0;h.myIn=0;h.inv=0;h.started=true;const b=myBlind();
+ if(b){const x=Math.min(b==="SB"?sb:bb,S.stack);S.stack=r2(S.stack-x);h.myIn=x;h.inv=x}
+ h._js=true;logp(`— Ny hånd: ${seatName(S.seat,S.tsize,false)}. Blinds ${f2(sb)}+${f2(bb)} i potten`+(h.myIn?`, du betalte ${money(h.myIn)}`:"")+".");h.fresh=true}
+function newHand(move){if(move)S.seat=(S.seat-1+S.tsize)%S.tsize;const keep=S.hand;S.hand=freshHand();S.opp=S.tsize-1;active={a:"hole",i:0};selRank=null;last=null;startHand();$("out").hidden=true;$("prog").style.width=0}
+function amt(){return numOk($("amt").value,0)}
+// --- innstillinger ---
+for(let i=2;i<=10;i++)$("tsize").innerHTML+=`<option>${i}</option>`;
+function fillSeats(){const n=S.tsize;let h="";for(let k=0;k<n;k++)h+=`<option value="${k}">${seatName(k,n,true)}</option>`;$("seat").innerHTML=h;$("seat").value=S.seat;let o="";for(let i=1;i<n;i++)o+=`<option>${i}</option>`;$("opp").innerHTML=o;$("opp").value=S.opp}
+function syncInputs(){$("tsize").value=S.tsize;$("bb").value=f2(S.bb);$("krv").value=S.krv;$("otype").value=S.otype;fillSeats()}
+$("tsize").onchange=()=>{S.tsize=+$("tsize").value;S.seat=Math.min(S.seat,S.tsize-1);S.opp=S.tsize-1;save();fillSeats();renderAll()};
+$("bb").onchange=()=>{S.bb=numOk($("bb").value,0)||S.bb;save();renderAll()};$("krv").onchange=()=>{S.krv=numOk($("krv").value,0)||S.krv;save();renderAll()};
+$("otype").onchange=()=>{S.otype=$("otype").value;save();renderAll()};$("opp").onchange=()=>{S.opp=+$("opp").value;save()};
+$("seat").onchange=()=>{const k=+$("seat").value;if(H().fresh){S.stack=r2(S.stack+H().myIn);S.log.pop();S.seat=k;const c={hole:H().hole,board:H().board};S.hand=freshHand();Object.assign(S.hand,c);startHand()}else S.seat=k;save();renderAll()};
+$("resetapp").onclick=()=>{if(!confirm("Slette alle lagrede innstillinger, penger og logg?"))return;try{localStorage.removeItem(KEY);localStorage.removeItem(OLD)}catch(e){}location.reload()};
+// --- rett ---
+$("editbtn").onclick=()=>{$("estack").value=f2(S.stack);$("epot").value=f2(H().pot);$("editrow").hidden=false};$("ecancel").onclick=()=>$("editrow").hidden=true;
+$("esave").onclick=()=>{const st=numOk($("estack").value,S.stack),p=numOk($("epot").value,H().pot);act(()=>{const fresh=S.log.length<=1;S.stack=r2(st);H().pot=r2(p);if(fresh)S.sessionStart=S.stack;logp(`Rettet: du har ${money(S.stack)}, potten ${money(H().pot)}.`)});$("editrow").hidden=true};
+// --- beløp ---
+function selMode(m){mode=m;document.querySelectorAll("#seg button").forEach(b=>b.classList.toggle("on",b.dataset.f===m));$("amtlbl").textContent=m==="opp"?"Motstander satset/høynet til (totalt denne runden)":"Jeg høynet til (totalt denne runden)";updAmt()}
+document.querySelectorAll("#seg button").forEach(b=>b.addEventListener("click",()=>selMode(b.dataset.f)));
+function updAmt(){const x=amt();$("amtkr").textContent=kr(x);$("reg").textContent=(mode==="opp"?"Registrer: motstander byr ":"Registrer: jeg høyner til ")+money(x)}
+$("amt").addEventListener("input",updAmt);
+document.querySelectorAll("#chips .chip").forEach(b=>b.addEventListener("click",()=>{const a=b.dataset.a,pot=H().pot;if((a==="half"||a==="pot")&&!pot)toast("Potten er 0");
+ $("amt").value=f2(a==="zero"?0:amt()+(a==="bb1"?S.bb:a==="bb5"?5*S.bb:a==="half"?pot/2:pot));updAmt()}));
+function needStart(){if(!H().started){toast("Trykk «Start hånd» først");return true}return false}
+$("reg").onclick=()=>{if(needStart())return;const x=r2(amt()),h=H();if(x<=h.curBet)return toast(`Må være mer enn dagens bud (${f2(h.curBet)})`);
+ if(mode==="opp")act(()=>{h.pot=r2(h.pot+x-h.oppIn);h.oppIn=x;h.curBet=x;logp(`Motstander byr ${money(x)} – du må betale ${money(toCall())}.`)});
+ else{const pay=r2(Math.min(x-h.myIn,S.stack));act(()=>{S.stack=r2(S.stack-pay);h.pot=r2(h.pot+pay);h.myIn=r2(h.myIn+pay);h.inv=r2(h.inv+pay);h.curBet=Math.max(h.curBet,h.myIn);logp(`Du høynet til ${money(h.myIn)} (betalte ${money(pay)})`+(S.stack===0?" – all-in.":"."))})}
+ $("amt").value="";updAmt()};
+$("ecall").onclick=()=>{if(needStart())return;const pay=toCall();if(!pay)return toast("Ingenting å synle – bruk «Jeg sjekket»");const h=H();
+ act(()=>{S.stack=r2(S.stack-pay);h.pot=r2(h.pot+pay);h.myIn=r2(h.myIn+pay);h.inv=r2(h.inv+pay);logp(`Du synlet ${money(pay)}.`)})};
+$("echeck").onclick=()=>{if(needStart())return;if(toCall())return toast(`Du kan ikke sjekke – det koster ${money(toCall())}. Synl eller kast.`);act(()=>logp("Du sjekket."))};
+$("efold").onclick=()=>{act(()=>{logp(`Du kastet (tapte ${money(H().inv)}).`);newHand(true)});toast(`Ny hånd – du er nå ${seatName(S.seat,S.tsize,false)}`)};
+$("elose").onclick=()=>{act(()=>{logp(`Du tapte hånden (${money(H().inv)}).`);newHand(true)});toast(`Ny hånd – du er nå ${seatName(S.seat,S.tsize,false)}`)};
+$("ewin").onclick=()=>{if(needStart())return;const p=H().pot;act(()=>{S.stack=r2(S.stack+p);logp(`🎉 Du vant potten: +${money(p)} (gevinst ${money(r2(p-H().inv))}).`);newHand(true)});toast(`Du vant ${money(p)}! Ny hånd – du er nå ${seatName(S.seat,S.tsize,false)}`)};
+$("esplit").onclick=()=>{if(needStart())return;const p=r2(H().pot/2);act(()=>{S.stack=r2(S.stack+p);logp(`Delt pott: +${money(p)}.`);newHand(true)});toast(`Delt pott. Ny hånd – du er nå ${seatName(S.seat,S.tsize,false)}`)};
+$("starthand").onclick=()=>act(()=>startHand());
+$("next").onclick=()=>{if(needStart())return;const h=H();act(()=>{h.myIn=0;h.oppIn=0;h.curBet=0;logp("▶ Neste bordkort.")});const n=boardCards().length,tgt=n<3?3:Math.min(n+1,5);for(let i=0;i<5;i++)if(h.board[i]===null&&i<tgt){active={a:"board",i};break}$("out").hidden=true;renderAll();$("board").scrollIntoView({behavior:"smooth"})};
+$("undo").onclick=()=>{if(!hist.length)return toast("Ingenting å angre");S=JSON.parse(hist.pop());save();syncInputs();$("out").hidden=true;renderAll();toast("Angret")};
+$("sessreset").onclick=()=>{if(!confirm("Starte en ny økt med dagens beløp?"))return;S.sessionStart=S.stack;S.log=[];hist=[];save();renderAll()};
+// --- kort ---
 function cardHTML(c){const s=SUITS[c&3];return `<span class="${s==="h"||s==="d"?"red":"blk"}">${RANKS[c>>2].replace("T","10")}${SYM[s]}</span>`}
-function boardCards(){return board.filter(c=>c!==null)}
-function render(){for(const [id,arr] of [["hole",hole],["board",board]]){$(id).innerHTML="";arr.forEach((c,i)=>{const d=document.createElement("div");d.className="slot"+(c!==null?" f":"")+(active.a===arr&&active.i===i?" act":"");d.innerHTML=c!==null?cardHTML(c):"+";d.onclick=()=>{if(c!==null)arr[i]=null;active={a:arr,i};render()};$(id).appendChild(d)})}
- const used=new Set([...hole,...board].filter(c=>c!==null));
- $("ranks").innerHTML="";for(let r=12;r>=0;r--){const b=document.createElement("button");b.className="rk"+(selRank===r?" on":"");b.textContent=RANKS[r].replace("T","10");b.disabled=[0,1,2,3].every(s=>used.has(r*4+s));b.onclick=()=>{selRank=r;render()};$("ranks").appendChild(b)}
- $("suits").innerHTML="";for(let s=0;s<4;s++){const b=document.createElement("button");b.className="su "+(s===1||s===2?"red":"blk");b.textContent=SYM[SUITS[s]];b.disabled=selRank===null||used.has(selRank*4+s);b.onclick=()=>{pick(selRank*4+s);selRank=null;render()};$("suits").appendChild(b)}
- $("posx").textContent=seatName(+$("seat").value,+$("tsize").value,false)+": "+POSX[pos()];
- const b=boardCards();let t="";if(!hole.includes(null)){if(b.length>=3){const a=analyze(hole,b);t=`<b>Du har: ${a.name}</b>`+(a.draws.length?` · Venter på: ${a.draws.join(", ")}`:"")+(a.outs||a.weak?` · ${a.outs} kort hjelper${a.weak?` (+ ${a.weak} litt)`:""} ≈ ${a.pct} % å treffe (grovt anslag – trykk Beregn for nøyaktig vinnersjanse)`:"")}else t=`<b>Starthånd:</b> ${chartLabel(hole,pos())} fra plassen din`}$("live").innerHTML=t}
-function pick(c){active.a[active.i]=c;const order=[...hole.map((x,i)=>[hole,i]),...board.map((x,i)=>[board,i])];const nx=order.find(([a,i])=>a[i]===null);if(nx)active={a:nx[0],i:nx[1]};}
-function newHand(moveSeat){hole.fill(null);board.fill(null);active={a:hole,i:0};selRank=null;last=null;setV("pot",0);setV("call",0);$("out").hidden=true;$("prog").style.width=0;
- if(moveSeat){const n=+$("tsize").value;$("seat").value=(+$("seat").value-1+n)%n;fillOppDefault();save()}render();scrollTo(0,0)}
-function fillOppDefault(){$("opp").value=+$("tsize").value-1}
-$("clr").onclick=()=>newHand(true);
-$("next").onclick=()=>{const n=boardCards().length;const tgt=n<3?3:Math.min(n+1,5);for(let i=0;i<5;i++)if(board[i]===null&&i<tgt){active={a:board,i};break}setV("call",0);$("out").hidden=true;render();$("board").scrollIntoView({behavior:"smooth"})};
-$("go").onclick=()=>{if(hole.includes(null))return alert("Velg begge dine kort først.");const b=boardCards();if(b.length===1||b.length===2)return alert("Bordet må ha 0, 3, 4 eller 5 kort.");
- const opp=+$("opp").value,ot=$("otype").value,total=20000,chunk=1000;let done=0,acc=0;$("go").disabled=true;
- (function step(){acc+=equity(hole,b,opp,chunk,ot)*chunk;done+=chunk;$("prog").style.width=(done/total*100)+"%";if(done<total)return setTimeout(step,0);$("go").disabled=false;show(acc/total,b,opp,ot)})()};
-function show(eq,b,opp,ot){const pot=num("pot"),call=Math.min(num("call"),num("stack")),stack=num("stack"),bb=num("bb");const info=analyze(hole,b);
- // beregn i hundredeler så avrunding fungerer med små beløp (0.10/0.20)
- const d=decide({eq,pot:pot*100,call:call*100,stack:stack*100,bb:bb*100,pos:pos(),preflop:b.length===0,hole,opp,otype:ot,info});const raise=r2(d.raise/100);
- last={pot,call,raise,act:d.act};$("out").hidden=false;$("didbox").hidden=false;$("raisebox").hidden=true;$("didmsg").textContent="";
+function boardCards(){return H().board.filter(c=>c!==null)}
+function pick(c){const h=H();h[active.a][active.i]=c;const order=[...h.hole.map((x,i)=>["hole",i]),...h.board.map((x,i)=>["board",i])];const nx=order.find(([a,i])=>h[a][i]===null);if(nx)active={a:nx[0],i:nx[1]};save()}
+function renderCards(){const h=H();for(const id of ["hole","board"]){$(id).innerHTML="";h[id].forEach((c,i)=>{const d=document.createElement("div");d.className="slot"+(c!==null?" f":"")+(active.a===id&&active.i===i?" act":"");d.innerHTML=c!==null?cardHTML(c):"+";d.onclick=()=>{if(c!==null){h[id][i]=null;save()}active={a:id,i};renderCards()};$(id).appendChild(d)})}
+ const used=new Set([...h.hole,...h.board].filter(c=>c!==null));
+ $("ranks").innerHTML="";for(let r=12;r>=0;r--){const b=document.createElement("button");b.className="rk"+(selRank===r?" on":"");b.textContent=RANKS[r].replace("T","10");b.disabled=[0,1,2,3].every(s=>used.has(r*4+s));b.onclick=()=>{selRank=r;renderCards()};$("ranks").appendChild(b)}
+ $("suits").innerHTML="";for(let s=0;s<4;s++){const b=document.createElement("button");b.className="su "+(s===1||s===2?"red":"blk");b.textContent=SYM[SUITS[s]];b.disabled=selRank===null||used.has(selRank*4+s);b.onclick=()=>{pick(selRank*4+s);selRank=null;renderCards()};$("suits").appendChild(b)}
+ const b=boardCards();let t="";if(!h.hole.includes(null)){if(b.length>=3){const a=analyze(h.hole,b);t=`<b>Du har: ${a.name}</b>`+(a.draws.length?` · Venter på: ${a.draws.join(", ")}`:"")+(a.outs||a.weak?` · ${a.outs} kort hjelper${a.weak?` (+ ${a.weak} litt)`:""} ≈ ${a.pct} % å treffe (grovt anslag – trykk Beregn for nøyaktig vinnersjanse)`:"")}else t=`<b>Starthånd:</b> ${chartLabel(h.hole,pos())} fra plassen din`}$("live").innerHTML=t}
+function renderAll(){const h=H();$("tstack").textContent=money(S.stack);$("tpot").textContent=money(h.pot);$("tcall").textContent=money(toCall());
+ $("posx").textContent=seatName(S.seat,S.tsize,false)+": "+POSX[pos()];$("seat").value=S.seat;$("opp").value=S.opp;
+ $("otx").textContent={random:"Vet ikke – regner med helt tilfeldige kort.",tight:"Blir bare med på gode kort.",normal:"Vanlige spillere.",loose:"Blir med på det meste.",aggr:"Byr høyt og ofte."}[S.otype];
+ $("setupsum").textContent=`– ${S.tsize} spillere, blinds ${f2(S.bb/2)}/${f2(S.bb)}, 1 sjetong = ${S.krv} kr, motstandere: ${$("otype").selectedOptions[0]?.text.toLowerCase()}`;
+ $("starthand").hidden=h.started;$("starthint").textContent=h.started?"":"Trykk «Start hånd» når kortene deles ut – blindene legges i potten automatisk.";
+ const d=r2(S.stack-S.sessionStart);$("sess").innerHTML=`Startet med <b>${money(S.sessionStart)}</b>, har nå <b>${money(S.stack)}</b>. Resultat: <b style="color:${d>=0?"#9be29b":"#f2a7a7"}">${d>=0?"+":"−"}${f2(Math.abs(d))} (${d>=0?"+":"−"}${kr(Math.abs(d))})</b>`;
+ $("log").innerHTML=S.log.slice(-25).map(x=>`<div>${x.replace(/</g,"&lt;")}</div>`).join("");$("log").scrollTop=1e6;updAmt();renderCards()}
+// --- beregn ---
+$("go").onclick=()=>{const h=H();if(h.hole.includes(null))return toast("Velg begge dine kort først.");const b=boardCards();if(b.length===1||b.length===2)return toast("Bordet må ha 0, 3, 4 eller 5 kort.");
+ const opp=S.opp,ot=S.otype,total=20000,chunk=1000;let done=0,acc=0;$("go").disabled=true;
+ (function step(){try{acc+=equity(h.hole,b,opp,chunk,ot)*chunk;done+=chunk;$("prog").style.width=(done/total*100)+"%";if(done<total)return setTimeout(step,0);$("go").disabled=false;show(acc/total,b,opp,ot)}catch(e){$("go").disabled=false;showErr(e.message)}})()};
+function show(eq,b,opp,ot){const h=H(),pot=h.pot,call=toCall(),stack=S.stack,bb=S.bb;const info=analyze(h.hole,b);
+ const d=decide({eq,pot:pot*100,call:call*100,stack:stack*100,bb:bb*100,pos:pos(),preflop:b.length===0,hole:h.hole,opp,otype:ot,info});
+ const raise=r2(Math.max(d.raise/100,h.myIn+0));last={pot,call,raise,act:d.act};$("out").hidden=false;
  const ai=raise>=stack?" (all-in)":"";$("rec").className="rec "+d.act;
  setTimeout(()=>{try{$("rec").scrollIntoView({behavior:"smooth",block:"center"})}catch(e){}},50);$("rec").textContent="Anbefalt: "+{Synl:`Synl ${money(call)} (betal for å være med)`,Kast:"Kast (gi opp hånden)",Sjekk:"Sjekk (stå over uten å betale)",Høyn:`Høyn til ${money(raise)}${ai}`,Sats:`Sats ${money(raise)}${ai}`+(pot&&!ai?` – ${Math.round(raise/pot*100)} % av potten`:"")}[d.act];$("why").textContent=d.why;
- const st=[["Du skulle betale",call?money(call):"0 (ingen hadde budt)"],["Vinnersjanse",(eq*100).toFixed(0)+" %"],["Du trenger minst",call?(d.req*100).toFixed(0)+" % for å synle":"– (gratis)"],["Potten",money(pot)],["Pengene dine",money(stack)]];
+ if(d.act==="Høyn"||d.act==="Sats"){selMode("me");$("amt").value=f2(raise);updAmt()}
+ const st=[["Du skal betale",call?money(call):"0 (ingen har budt)"],["Vinnersjanse",Math.round(eq*100)+" %"],["Du trenger minst",call?Math.round(d.req*100)+" % for å synle":"– (gratis)"],["Potten",money(pot)],["Pengene dine",money(stack)]];
  const adv=[["Vinnersjanse (nøyaktig)",(eq*100).toFixed(1)+" %"],["Hvor mye du må betale i forhold til potten",call?`${f2(call)} for å vinne ${f2(pot)} (${potOdds(pot,call).toFixed(1)} : 1)`:"–"],["Stack i forhold til potten",isFinite(d.spr)?d.spr.toFixed(1):"–"],["Pengene dine",bb?(stack/bb).toFixed(0)+" ganger store blind":f2(stack)],["Plass-type (pokerspråk)",{UTG:"tidlig (UTG)",MP:"midt (MP)",CO:"sen (cutoff)",BTN:"giver (button)",SB:"lille blind (SB)",BB:"store blind (BB)"}[pos()]]];
- if(info){st.unshift(["Du har",info.name]);if(info.outs||info.weak)st.push(["Kort som hjelper deg",`${info.outs}${info.weak?` (+ ${info.weak} litt)`:""} – ca. ${info.pct} % å treffe`])}else st.push(["Starthånden din",chartLabel(hole,pos())]);
+ if(info){st.unshift(["Du har",info.name]);if(info.outs||info.weak)st.push(["Kort som hjelper deg",`${info.outs}${info.weak?` (+ ${info.weak} litt)`:""} – ca. ${info.pct} % å treffe`])}else st.push(["Starthånden din",chartLabel(h.hole,pos())]);
  $("adv").innerHTML=adv.map(([a,v])=>`<div class="stat"><small>${a}</small><b>${v}</b></div>`).join("");
- $("stats").innerHTML=st.map(([a,v])=>`<div class="stat" data-k="${a}"><small>${a}</small><b>${v}</b></div>`).join("");
- $("draws").textContent=info&&info.draws.length?"Du venter på: "+info.draws.join(", ")+".":"";
- setV("call",0);// klar for neste beslutning; potten beholdes
- $("out").scrollIntoView({behavior:"smooth"})}
-function paid(x){if(!last)return;$("didbox").hidden=true;$("raisebox").hidden=true;x=Math.min(x,num("stack"));setV("stack",num("stack")-x);setV("pot",last.pot+x);setV("call",0);save();last=null;
- const upd=(k,v)=>{const e=document.querySelector(`#stats [data-k="${k}"] b`);if(e)e.textContent=v};upd("Potten",money(num("pot")));upd("Pengene dine",money(num("stack")));$("rec").textContent="✔ Registrert – "+$("rec").textContent.replace(/^Anbefalt: /,"Anbefalt var: ");$("why").textContent=`Oppdatert: du betalte ${money(x)}. Potten er nå ${money(num("pot"))}, du har ${money(num("stack"))} igjen. Legg til det de andre byr, eller trykk «Neste bordkort».`;$("didmsg").textContent=`✔ Registrert: du betalte ${money(x)}. Knappene er skjult til neste «Beregn».`}
-$("didcall").onclick=()=>last&&paid(last.call);
-$("didraise").onclick=()=>{if(!last)return;$("raisebox").hidden=false;$("raisev").value=f2(last.raise||last.call);updRaise();$("raisev").focus()};
-function updRaise(){$("raisekr").textContent=kr(num("raisev"))}$("raisev").addEventListener("input",updRaise);
-document.querySelectorAll("[data-r]").forEach(b=>b.addEventListener("click",()=>{if(!last)return;const a=b.dataset.r,cur=num("raisev"),bb=num("bb")||0.2,pot=last.pot;
- if((a==="half"||a==="pot")&&!pot)toast("Potten er 0");$("raisev").value=f2(a==="zero"?0:a==="rec"?(last.raise||last.call):cur+(a==="bb1"?bb:a==="half"?pot/2:pot));updRaise()}));
-$("raiseok").onclick=()=>{const x=num("raisev");if(x>0)paid(x)};$("raisecancel").onclick=()=>{$("raisebox").hidden=true};
-$("didfold").onclick=()=>{newHand(true);toast(`Ny hånd – du er nå ${seatName(+$("seat").value,+$("tsize").value,false)}`)};
-function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2500)}
-updKr();updSum();updOt();render();
+ $("stats").innerHTML=st.map(([a,v])=>`<div class="stat"><small>${a}</small><b>${v}</b></div>`).join("");
+ $("draws").textContent=info&&info.draws.length?"Du venter på: "+info.draws.join(", ")+".":"";}
+try{syncInputs();selMode("opp");renderAll();$("setup").open=!localStorage.getItem(KEY);save()}catch(e){showErr(e.message)}
 </script></body></html>
